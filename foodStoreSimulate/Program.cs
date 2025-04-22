@@ -11,6 +11,7 @@ builder.Services.AddSingleton<RestaurantService>();
 builder.Services.AddSingleton<TextLogger>();
 builder.Services.AddSingleton<UIStateService>();
 builder.Services.AddSingleton<CustomerQueueService>();
+builder.Services.AddSingleton<FoodQueueService>();
 
 var app = builder.Build();
 

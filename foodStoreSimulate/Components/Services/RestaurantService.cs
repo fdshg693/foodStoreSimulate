@@ -9,21 +9,20 @@ namespace foodStoreSimulate.Components.Services
     {
         private readonly TextLogger logger;
         private readonly CustomerQueueService customerQueueService;
-        private readonly Queue<CookedFood> cookedFoodQueue = new();
-        private readonly Queue<Garbage> garbageQueue = new();
-        private int maxFoodId = 0;
+        private readonly FoodQueueService foodQueueService;
         private UIStateService uIStateService;
 
-        public RestaurantService(TextLogger logger, CustomerQueueService customerQueueService, UIStateService uIStateService)
+        public RestaurantService(TextLogger logger, CustomerQueueService customerQueueService, FoodQueueService foodQueueService, UIStateService uIStateService)
         {
             this.logger = logger;
             this.customerQueueService = customerQueueService;
             this.uIStateService = uIStateService;
+            this.foodQueueService = foodQueueService;
         }
 
         public IReadOnlyCollection<Customer> Customers => customerQueueService.Customers;
-        public IReadOnlyCollection<CookedFood> Foods => cookedFoodQueue;
-        public IReadOnlyCollection<Garbage> Garbages => garbageQueue;
+        public IReadOnlyCollection<CookedFood> Foods => foodQueueService.cookedFoods;
+        public IReadOnlyCollection<Garbage> Garbages => foodQueueService.Garbages;
 
         public void EnqueueCustomer()
         {
@@ -33,22 +32,13 @@ namespace foodStoreSimulate.Components.Services
 
         public void EnqueueFood(MenuItem orderedFood)
         {
-            maxFoodId++;
-            var cookedFood = new CookedFood { CookedItemId = maxFoodId, MenuItem = orderedFood };
-            cookedFoodQueue.Enqueue(cookedFood);
-            logger.AddLog($"食品が準備されました: {cookedFood.MenuItem.Food.DishName}");
+            foodQueueService.EnqueueFood(orderedFood);
             TryServe();
         }
 
         public void DisposeExpiredFood()
         {
-            while (cookedFoodQueue.Any() && cookedFoodQueue.Peek().IsExpired())
-            {
-                var cookedFood = cookedFoodQueue.Dequeue();
-                var garbage = Garbage.AutoGenereateGarbage(cookedFood);
-                garbageQueue.Enqueue(garbage);
-                logger.AddLog($"{garbage.DishName} は賞味期限切れのため廃棄しました。");
-            }
+            foodQueueService.DisposeExpiredFood();
         }
 
         public async Task CookAsync(int SelectedValue)
@@ -67,11 +57,11 @@ namespace foodStoreSimulate.Components.Services
         private void TryServe()
         {
             DisposeExpiredFood();
-            while (customerQueueService.Any() && cookedFoodQueue.Any())
+            while (customerQueueService.Any() && foodQueueService.AnyFood())
             {
                 var customer = customerQueueService.DequeueCustomer();
-                var cookedFood = cookedFoodQueue.Dequeue();
-                logger.AddLog($"{customer.Name} に {cookedFood.MenuItem.Food.DishName} を提供しました。");
+                var cookedFood = foodQueueService.DequeueFood();
+                logger.AddLog($"{customer.Name} に {cookedFood.Food.DishName} を提供しました。");
             }
         }
     }
