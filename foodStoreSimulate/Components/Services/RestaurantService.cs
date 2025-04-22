@@ -8,30 +8,26 @@ namespace foodStoreSimulate.Components.Services
     public class RestaurantService : IRestaurantService
     {
         private readonly TextLogger logger;
-        private readonly Queue<Customer> customerQueue = new();
+        private readonly CustomerQueueService customerQueueService;
         private readonly Queue<CookedFood> cookedFoodQueue = new();
         private readonly Queue<Garbage> garbageQueue = new();
-        private int maxCustomerId = 0;
         private int maxFoodId = 0;
         private UIStateService uIStateService;
 
-
-        public RestaurantService(TextLogger logger)
+        public RestaurantService(TextLogger logger, CustomerQueueService customerQueueService, UIStateService uIStateService)
         {
             this.logger = logger;
-            this.uIStateService = new UIStateService();
+            this.customerQueueService = customerQueueService;
+            this.uIStateService = uIStateService;
         }
 
-        public IReadOnlyCollection<Customer> Customers => customerQueue;
+        public IReadOnlyCollection<Customer> Customers => customerQueueService.Customers;
         public IReadOnlyCollection<CookedFood> Foods => cookedFoodQueue;
         public IReadOnlyCollection<Garbage> Garbages => garbageQueue;
 
         public void EnqueueCustomer()
         {
-            maxCustomerId++;
-            var customer = Customer.AutoGenereateCustomer(maxCustomerId);
-            customerQueue.Enqueue(customer);
-            logger.AddLog($"お客さんが並びました: {customer.Name}");
+            customerQueueService.EnqueueCustomer();
             TryServe();
         }
 
@@ -71,9 +67,9 @@ namespace foodStoreSimulate.Components.Services
         private void TryServe()
         {
             DisposeExpiredFood();
-            while (customerQueue.Any() && cookedFoodQueue.Any())
+            while (customerQueueService.Any() && cookedFoodQueue.Any())
             {
-                var customer = customerQueue.Dequeue();
+                var customer = customerQueueService.DequeueCustomer();
                 var cookedFood = cookedFoodQueue.Dequeue();
                 logger.AddLog($"{customer.Name} に {cookedFood.MenuItem.Food.DishName} を提供しました。");
             }

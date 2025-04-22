@@ -121,9 +121,9 @@
             await Restaurant.CookAsync(number);
         } else {
             await Task.CompletedTask;
-        }
-        
+        }        
     }
+
     private System.Threading.Timer? _timer;
 
     protected override void OnInitialized()
