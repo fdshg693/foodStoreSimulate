@@ -1,5 +1,5 @@
 ﻿using foodStoreSimulate.Components.Services.Entities;
-using Microsoft.Extensions.Logging;
+using foodStoreSimulate.Components.Services.Application;
 
 namespace foodStoreSimulate.Components.Services
 {
@@ -8,15 +8,17 @@ namespace foodStoreSimulate.Components.Services
         private readonly TextLogger logger;
         private readonly Queue<Customer> customerQueue = new();
         private int maxCustomerId = 0;
+        private CustomerFactory customerFactory;
         public IReadOnlyCollection<Customer> Customers => customerQueue;
-        public CustomerQueueService(TextLogger logger)
+        public CustomerQueueService(TextLogger logger, CustomerFactory customerFactory)
         {
             this.logger = logger;
+            this.customerFactory = customerFactory;
         }
         public void EnqueueCustomer()
         {
             maxCustomerId++;
-            var customer = Customer.AutoGenereateCustomer(maxCustomerId);
+            var customer = customerFactory.Create(maxCustomerId);
             customerQueue.Enqueue(customer);
             logger.AddLog($"お客さんが並びました: {customer.Name}");
         }

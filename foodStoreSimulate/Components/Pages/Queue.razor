@@ -44,7 +44,7 @@
             <tr>
                 <th scope="row">@customer.Name</th>
                 <td>@customer.CreatedAt.ToString(@"h\:mm\:ss")</td>
-                <td>@customer.GetWaitingTime().ToString(@"m\:ss")</td>
+                <td>@customer.GetWaitingTime(DateTime.Now).ToString(@"m\:ss")</td>
             </tr>
         }
     </tbody>    

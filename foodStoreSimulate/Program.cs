@@ -1,5 +1,6 @@
 using foodStoreSimulate.Components;
 using foodStoreSimulate.Components.Services;
+using foodStoreSimulate.Components.Services.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,6 +13,8 @@ builder.Services.AddSingleton<TextLogger>();
 builder.Services.AddSingleton<UIStateService>();
 builder.Services.AddSingleton<CustomerQueueService>();
 builder.Services.AddSingleton<FoodQueueService>();
+builder.Services.AddSingleton<CustomerFactory>();
+builder.Services.AddSingleton<IDateTimeProvider, SystemDateTimeProvider>();
 
 var app = builder.Build();
 

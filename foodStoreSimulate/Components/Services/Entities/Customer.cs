@@ -2,16 +2,18 @@
 {
     public class Customer
     {
-        public required int Id { get; set; }
-        public required string Name { get; set; }
-        public required DateTime CreatedAt { get; set; }
-        public static Customer AutoGenereateCustomer(int Id)
+        public int Id { get; }
+        public string Name { get; }
+        public DateTime CreatedAt { get; }
+
+        public Customer(int id, string name, DateTime createdAt)
         {
-            return new Customer { Id = Id, Name = $"customer {Id}", CreatedAt = DateTime.Now };
+            Id = id;
+            Name = name;
+            CreatedAt = createdAt;
         }
-        public TimeSpan GetWaitingTime()
-        {
-            return DateTime.Now - this.CreatedAt; 
-        }
+
+        public TimeSpan GetWaitingTime(DateTime now) =>
+            now - CreatedAt;
     }
 }
